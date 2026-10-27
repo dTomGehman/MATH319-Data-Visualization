@@ -10,6 +10,8 @@
 library(shiny)
 library(tidyverse)
 library(bslib)
+library(extrafont)
+loadfonts(device = "win")
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
@@ -33,10 +35,16 @@ ui <- fluidPage(
                 )
       ),
       nav_panel("Plot2", 
-                splitLayout(cellWidths = c("50%", "50%"), 
-                            plotOutput("genusplot",   height = 1000, width=800), 
-                            plotOutput("speciesplot", height = 1000, width=800)
+                splitLayout(cellWidths = c("40%", "60%"), 
+                            plotOutput("genusplot",   height = 800, width=600), 
+                            plotOutput("speciesplot", height = 800, width=1000)
                             )
+      ),
+      nav_panel("dayCt", 
+                splitLayout(cellWidths = c("50%", "50%"), 
+                            plotOutput("daysplot",   height = 800, width=800), 
+                            plotOutput("dayshist", height = 800, width=800)
+                )
       )
                 
     )
@@ -65,15 +73,29 @@ server <- function(input, output) {
       ggplot(aes(y = fct_reorder(genus, n), x = n)) +
       geom_col(width=0.9, position="dodge") +
       labs(x = "group") + 
-      theme(text=element_text(size = 30))
+      theme(text=element_text(size = 25, family="Consolas"))
   })
   
   output$speciesplot = renderPlot({
-    count(data,species) %>% filter(n>7) %>%
-      ggplot(aes(y = fct_reorder(species, n), x = n)) +
+    count(data,species,commonName) %>% filter(n>7) %>%
+      ggplot(aes(
+        y = fct_reorder(
+          paste(species, 
+                #paste(replicate(nchar(species), "-"),collapse=""), 
+                commonName, 
+                sep=": "), n), 
+        x = n)) +
       geom_col(width=0.9, position="dodge") +
       labs(x = "group") + 
-      theme(text=element_text(size = 30))
+      theme(text=element_text(size = 20, family="Consolas"))
+  })
+  
+  output$daysplot = renderPlot({
+    ggplot(data, aes(x=dayCt, y=percentTotal)) + geom_point()
+  })
+  
+  output$dayshist = renderPlot({
+    ggplot(data, aes(x=dayCt)) + geom_histogram()
   })
 }
 
