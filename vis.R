@@ -16,10 +16,10 @@ loadfonts(device = "win")
 # Define UI for application that draws a histogram
 ui <- fluidPage(
     # Application title
-    titlePanel("eBird Leaderboard Data"),
+    titlePanel("eBird Leaderboard Data, Cumberland County, 2016-2025", windowTitle = "eBird Leaderboard"),
 
     navset_card_underline(
-      nav_panel("Plot", 
+      nav_panel("Number of Species and Checklists", 
                 sidebarLayout(
                       sidebarPanel(
                           sliderInput("yrs",
@@ -30,17 +30,17 @@ ui <- fluidPage(
                       ),
                       # Show a plot of the generated distribution
                       mainPanel(
-                         plotOutput("test")
+                         plotOutput("test", height=600, width=1000)
                       )
                 )
       ),
-      nav_panel("Plot2", 
+      nav_panel("Genera and Species", 
                 splitLayout(cellWidths = c("40%", "60%"), 
                             plotOutput("genusplot",   height = 800, width=600), 
                             plotOutput("speciesplot", height = 800, width=1000)
                             )
       ),
-      nav_panel("dayCt", 
+      nav_panel("Timeline", 
                 splitLayout(cellWidths = c("50%", "50%"), 
                             plotOutput("daysplot",   height = 800, width=800), 
                             plotOutput("dayshist", height = 800, width=800)
@@ -63,17 +63,21 @@ server <- function(input, output) {
       dataf=filter(data, year==as.integer(input$yrs))
     }
     ggplot(dataf, aes(x=as.integer(Nchecklists), y=as.integer(Nspecies))) +
-      geom_point(aes(colour=dayCt)) +
-      xlim(0,600) + ylim(0,250) +
-      xlab("Number of Checklists") + ylab("Number of Species")
+      geom_point() +
+      xlim(0,700) + ylim(0,250) +
+      xlab("Number of Checklists") + ylab("Number of Species") + 
+      theme(text=element_text(size=20))+
+      ggtitle("Checklists and Species", subtitle="Each birder's number of checklists and species in a year")
   })
   
   output$genusplot = renderPlot({
     count(data,genus) %>% filter(n>7) %>%
       ggplot(aes(y = fct_reorder(genus, n), x = n)) +
       geom_col(width=0.9, position="dodge") +
-      labs(x = "group") + 
-      theme(text=element_text(size = 25, family="Consolas"))
+      labs(x = "Count", y="Genus", 
+           title="Quantities of each Genus",
+           caption="The genus of the last species each\n birder added to his/her year list") + 
+      theme(text=element_text(size = 20, family="Consolas"))
   })
   
   output$speciesplot = renderPlot({
@@ -86,16 +90,26 @@ server <- function(input, output) {
                 sep=": "), n), 
         x = n)) +
       geom_col(width=0.9, position="dodge") +
-      labs(x = "group") + 
+      labs(x = "Count", y="Species", 
+           title="Quantities of each Species", 
+           caption="The last species birders added to their year lists") + 
       theme(text=element_text(size = 20, family="Consolas"))
   })
   
   output$daysplot = renderPlot({
-    ggplot(data, aes(x=dayCt, y=percentTotal)) + geom_point()
+    ggplot(data, aes(x=dayCt, y=percentTotal)) + geom_point() +
+      theme(text=element_text(size = 30)) + 
+      labs(x="Day of the year (starting at Jan 1 = 0)", 
+           y="Percent of Total Species Observed",
+           title="Date and Percent of Total Observed",
+           caption="Last new observation date")
   })
   
   output$dayshist = renderPlot({
-    ggplot(data, aes(x=dayCt)) + geom_histogram()
+    ggplot(data, aes(x=dayCt)) + geom_histogram() +
+      theme(text=element_text(size = 30)) +
+      labs(x="Day of the year (starting at Jan 1 = 0)", y="Count", 
+           title="Last New Species Observed Date")
   })
 }
 
