@@ -99,7 +99,7 @@ server <- function(input, output) {
   output$daysplot = renderPlot({
     ggplot(data, aes(x=dayCt, y=percentTotal)) + geom_point() +
       theme(text=element_text(size = 30)) + 
-      labs(x="Day of the year (starting at Jan 1 = 0)", 
+      labs(x="Day of the year (starting at Jan 1 = 1)", 
            y="Percent of Total Species Observed",
            title="Date and Percent of Total Observed",
            caption="Last new observation date")
@@ -108,7 +108,7 @@ server <- function(input, output) {
   output$dayshist = renderPlot({
     ggplot(data, aes(x=dayCt)) + geom_histogram() +
       theme(text=element_text(size = 30)) +
-      labs(x="Day of the year (starting at Jan 1 = 0)", y="Count", 
+      labs(x="Day of the year (starting at Jan 1 = 1)", y="Count", 
            title="Last New Species Observed Date")
   })
 }
